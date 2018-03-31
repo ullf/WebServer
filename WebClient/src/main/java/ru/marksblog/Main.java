@@ -8,8 +8,6 @@ import javafx.stage.Stage;
 
 public class Main extends Application{
 
-    static Client client2;
-
     public static void main(String[] args){
         //client2=new Client();
        // Client client=new Client(client2.getAddress(),client2.getPort());

@@ -11,6 +11,8 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.*;
@@ -33,13 +35,17 @@ public class Controller  extends Client implements Initializable{
     User user;
     ObservableList <FileData>list=FXCollections.observableArrayList();
     File file;
+    private static final Logger logger= LoggerFactory.getLogger(Main.class);
 
     public Controller(){
+        logger.info("Started!");
+       // logger= LoggerFactory.getLogger(Controller.class);
 
     }
 
     public void login(){
         nickname=nick.getText();
+        logger.info("Nickname have been set");
         synchronize();
         //desynchronize();
     }
@@ -55,6 +61,7 @@ public class Controller  extends Client implements Initializable{
         }
         try {
             client=new Socket(ip,Integer.valueOf(ipport));
+            logger.info("Connected!");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,7 +86,8 @@ public class Controller  extends Client implements Initializable{
                         }).start();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    logger.error("Not connected to the server!");
                 }
 
 
