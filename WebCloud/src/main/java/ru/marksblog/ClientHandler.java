@@ -94,12 +94,13 @@ public class ClientHandler implements Runnable{
                                     }
                                     fout.close();
                                     user.addFile(filename);
-                                    user.printAllFiles();
+                                    //user.printAllFiles();
                                     try {
-                                        FileOutputStream serializable=new FileOutputStream("C:\\Users\\mark\\Desktop\\"+user.getNickname()+".ser",true);
+                                        FileOutputStream serializable=new FileOutputStream("C:\\Users\\mark\\Desktop\\"+user.getNickname()+".ser");
                                         ObjectOutputStream obj=new ObjectOutputStream(serializable);
                                         obj.writeObject(user);
                                         obj.close();
+                                        serializable.close();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     } catch (SecurityException e) {

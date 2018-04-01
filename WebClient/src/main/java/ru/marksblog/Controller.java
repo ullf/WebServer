@@ -15,9 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.plaf.synth.SynthScrollBarUI;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller  extends Client implements Initializable{
@@ -35,11 +37,10 @@ public class Controller  extends Client implements Initializable{
     User user;
     ObservableList <FileData>list=FXCollections.observableArrayList();
     File file;
-    private static final Logger logger= LoggerFactory.getLogger(Main.class);
+    private final Logger logger= LoggerFactory.getLogger(Controller.class);
 
     public Controller(){
         logger.info("Started!");
-       // logger= LoggerFactory.getLogger(Controller.class);
 
     }
 
@@ -47,7 +48,6 @@ public class Controller  extends Client implements Initializable{
         nickname=nick.getText();
         logger.info("Nickname have been set");
         synchronize();
-        //desynchronize();
     }
 
     public void connect(){
@@ -63,7 +63,8 @@ public class Controller  extends Client implements Initializable{
             client=new Socket(ip,Integer.valueOf(ipport));
             logger.info("Connected!");
         } catch (IOException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
+            logger.error("Failed to connect");
         }
     }
 
@@ -71,8 +72,8 @@ public class Controller  extends Client implements Initializable{
         new Thread(new Runnable() {
             @Override
             public void run() {
-                file=new File(nickname+".ser");
                 try {
+                    file=new File(nickname+".ser");
                     if(!file.exists()){
                         file.createNewFile();
                         //System.out.println(file.getAbsolutePath());
@@ -97,29 +98,34 @@ public class Controller  extends Client implements Initializable{
     }
 
     public void desynchronize(){
-         new Thread(new Runnable() {
-            @Override
-            public void run() {
-                file=new File(nickname+".ser");
+
+                //file=new File(nickname+".ser");
                 up=new FileUpload(client);
                 up.sendByte(up.RECEIVE_FILE);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        file=new File(nickname+".ser");
+                        System.out.println(file.getAbsolutePath());
                         up.downloadFile(file.getName(),2048);
                         try {
                             ObjectInputStream oos=new ObjectInputStream(new FileInputStream(file));
                             user=(User)oos.readObject();
                             oos.close();
-                            user.printAllFiles();
+                            ArrayList l=user.getList();
+                            System.out.println(user.getNickname());
+                            for(int i=0;i<l.size();i++){
+                                FileData filedata;
+                                filedata=new FileData(l.get(i).toString()," bytes");
+                                list.add(filedata);
+                                System.out.println(l.get(i));
+                            }
+                            table.setItems(list);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 }).start();
-            }
-        }).start();
-
     }
 
     public void over(){
@@ -215,7 +221,6 @@ public class Controller  extends Client implements Initializable{
             @Override
             public void run() {
                 up.uploadFile(file.getAbsolutePath(),nickname);
-                desynchronize();
             }
         }).start();
 
