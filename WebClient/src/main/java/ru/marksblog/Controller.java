@@ -15,12 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.plaf.synth.SynthScrollBarUI;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller  extends Client implements Initializable{
 
@@ -34,6 +32,7 @@ public class Controller  extends Client implements Initializable{
     @FXML private TextField port,ipaddr;
     private FileUpload up;
     private String nickname;
+    private boolean canSync=true;
     User user;
     ObservableList <FileData>list=FXCollections.observableArrayList();
     File file;
@@ -100,6 +99,7 @@ public class Controller  extends Client implements Initializable{
     public void desynchronize(){
 
                 //file=new File(nickname+".ser");
+                System.out.println(canSync);
                 up=new FileUpload(client);
                 up.sendByte(up.RECEIVE_FILE);
                 new Thread(new Runnable() {
@@ -112,15 +112,21 @@ public class Controller  extends Client implements Initializable{
                             ObjectInputStream oos=new ObjectInputStream(new FileInputStream(file));
                             user=(User)oos.readObject();
                             oos.close();
-                            ArrayList l=user.getList();
-                            System.out.println(user.getNickname());
+                            HashMap l=user.getList();
+                            Object arr[]=null;
                             for(int i=0;i<l.size();i++){
                                 FileData filedata;
-                                filedata=new FileData(l.get(i).toString()," bytes");
-                                list.add(filedata);
-                                System.out.println(l.get(i));
+                                arr=l.keySet().toArray();
+                                filedata=new FileData(arr[i].toString(),user.getList().values().toArray()[i].toString()+" bytes");
+                                System.out.println(l.keySet().toString());
+                                if(canSync){
+                                    list.add(filedata);
+                                }
                             }
-                            table.setItems(list);
+                            if(canSync){
+                                table.setItems(list);
+                            }
+                            canSync=false;
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -179,6 +185,7 @@ public class Controller  extends Client implements Initializable{
                 String size=String.valueOf(file.length());
                 list.add(new FileData(file.getName().toString(),size+" bytes"));
                 table.setItems(list);
+                canSync=true;
             }
         });
     }
@@ -239,6 +246,7 @@ public class Controller  extends Client implements Initializable{
         filedata=new FileData(file.getName().toString(),size+" bytes");
         list.add(filedata);
         table.setItems(list);
+        canSync=true;
 
 
     }

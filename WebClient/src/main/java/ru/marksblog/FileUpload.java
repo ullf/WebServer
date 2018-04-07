@@ -1,5 +1,8 @@
 package ru.marksblog;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -15,6 +18,7 @@ public class FileUpload implements Runnable{
     byte buffer[]=new byte[1024];
     final byte SEND_FILE = 4;
     final byte RECEIVE_FILE = 5;
+    private final Logger logger= LoggerFactory.getLogger(FileUpload.class);
     public FileUpload(Socket client){
         this.client=client;
     }
@@ -32,6 +36,7 @@ public class FileUpload implements Runnable{
             output=client.getOutputStream();
             output.write(firstbyte);
         } catch (IOException e) {
+            logger.error("Not connected to the server!");
             e.printStackTrace();
         }
     }
@@ -48,6 +53,7 @@ public class FileUpload implements Runnable{
             input=client.getInputStream();
             output=new FileOutputStream(filename);
         } catch (IOException e) {
+            logger.error("Failed to download file!");
             e.printStackTrace();
         }
         file=new File(filename);
@@ -61,6 +67,7 @@ public class FileUpload implements Runnable{
             output.close();
             fin.close();
         } catch (IOException e) {
+            logger.error("Failed to save a file!");
             e.printStackTrace();
         }
     }
@@ -95,6 +102,7 @@ public class FileUpload implements Runnable{
            // progress=0.0;
             System.out.println("File uploaded!");
         } catch (Exception e) {
+            logger.error("Failed to upload file!");
             e.printStackTrace();
         }
     }

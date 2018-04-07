@@ -2,6 +2,7 @@ package ru.marksblog;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ClientHandler implements Runnable{
@@ -9,6 +10,7 @@ public class ClientHandler implements Runnable{
     Socket client;
     private OutputStream output[]=new OutputStream[10];
     private FileOutputStream fout;
+    //FileOutputStream serializable;
     private FileInputStream fin;
     private InputStream input,input2;
     private String filename,nickname;
@@ -19,6 +21,48 @@ public class ClientHandler implements Runnable{
     public ClientHandler(Socket client){
         this.client=client;
         this.client=new Socket();
+    }
+
+    public void saveUserFiles(){
+            try {
+                FileWriter fw=new FileWriter(user.getNickname());
+                BufferedWriter wr=new BufferedWriter(fw);
+               /* for(int i=0;i<user.getList().size();i++){
+                    wr.write(user.getList().get(i)+"/");
+                }*/
+               /*for(Object sizes: user.getList().values()){
+                    wr.write(sizes.toString()+" ");
+                    System.out.println(sizes.toString());
+               }*/
+                for ( Object key : user.getList().keySet() ) {
+                    wr.write(key.toString()+"/");
+                }
+                wr.close();
+                fw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+    }
+
+    public ArrayList readUserFiles(){
+        ArrayList <String>list=new ArrayList<>();
+        try {
+            FileReader fr=new FileReader(user.getNickname());
+            BufferedReader br=new BufferedReader(fr);
+            try {
+                String str[]=br.readLine().split("/");
+                for(int i=0;i<str.length;i++){
+                    list.add(str[i]);
+                }
+                br.close();
+                fr.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     public long getFilesize() throws IOException{
@@ -86,21 +130,31 @@ public class ClientHandler implements Runnable{
                                    // if(user.getNickname().equals(null)){
                                         user.setNickname(nickname);
                                    // }
-                                    fout=new FileOutputStream("C:\\Users\\mark\\Desktop\\"+filename);
+                                    fout=new FileOutputStream(filename);
                                     input2 = client.getInputStream();
                                     for(int i=0;i<filesize;i++){
                                         in2 = input2.read();
                                         fout.write(in2);
                                     }
                                     fout.close();
-                                    user.addFile(filename);
+
+                                    ArrayList <String> tmp=readUserFiles();
+                                    for(int i=0;i<tmp.size();i++){
+                                        // if(!user.getList().contains(user.getList().get(i))){
+                                        File ftmp=new File(tmp.get(i));
+                                        user.addFile(tmp.get(i),(int)ftmp.length());
+                                        // }
+                                    }
+
+                                    File ftmp=new File(filename);
+                                    user.addFile(filename,(int)ftmp.length());
+                                    saveUserFiles();
                                     //user.printAllFiles();
                                     try {
-                                        FileOutputStream serializable=new FileOutputStream("C:\\Users\\mark\\Desktop\\"+user.getNickname()+".ser");
+                                        FileOutputStream serializable=new FileOutputStream(user.getNickname()+".ser");
                                         ObjectOutputStream obj=new ObjectOutputStream(serializable);
                                         obj.writeObject(user);
                                         obj.close();
-                                        serializable.close();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     } catch (SecurityException e) {
@@ -127,7 +181,7 @@ public class ClientHandler implements Runnable{
                             }
                         }
                         System.out.println(tmp);
-                        fin=new FileInputStream("C:\\Users\\mark\\Desktop\\"+filename);
+                        fin=new FileInputStream(filename);
                         for(int i=0;i<filesize;i++){
                             b=fin.read();
                             output[tmp].write(b);
