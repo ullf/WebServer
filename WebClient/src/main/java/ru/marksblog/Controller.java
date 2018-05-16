@@ -40,11 +40,16 @@ public class Controller  extends Client implements Initializable{
 
     public Controller(){
         logger.info("Started!");
-
     }
 
     public void login(){
         nickname=nick.getText();
+       /* try {
+            OutputStream output=client.getOutputStream();
+            output.write((byte)3);
+            output.write(nickname.getBytes());
+        } catch (IOException e) {
+        }*/
         logger.info("Nickname have been set");
         synchronize();
     }
@@ -62,7 +67,6 @@ public class Controller  extends Client implements Initializable{
             client=new Socket(ip,Integer.valueOf(ipport));
             logger.info("Connected!");
         } catch (IOException e) {
-           // e.printStackTrace();
             logger.error("Failed to connect");
         }
     }
@@ -75,7 +79,6 @@ public class Controller  extends Client implements Initializable{
                     file=new File(nickname+".ser");
                     if(!file.exists()){
                         file.createNewFile();
-                        //System.out.println(file.getAbsolutePath());
                         up=new FileUpload(client);
                         up.sendByte(up.SEND_FILE);
                         new Thread(new Runnable() {
@@ -86,7 +89,6 @@ public class Controller  extends Client implements Initializable{
                         }).start();
                     }
                 } catch (IOException e) {
-                   // e.printStackTrace();
                     logger.error("Not connected to the server!");
                 }
 
@@ -98,7 +100,6 @@ public class Controller  extends Client implements Initializable{
 
     public void desynchronize(){
 
-                //file=new File(nickname+".ser");
                 System.out.println(canSync);
                 up=new FileUpload(client);
                 up.sendByte(up.RECEIVE_FILE);
@@ -141,8 +142,6 @@ public class Controller  extends Client implements Initializable{
                 event.acceptTransferModes(TransferMode.ANY);
                 Dragboard drag=event.getDragboard();
                 file=drag.getFiles().get(0);
-                //event.consume();
-                //System.out.println(file.getPath());
             }
         });
     }
@@ -168,11 +167,9 @@ public class Controller  extends Client implements Initializable{
                     public void run() {
                         while (up.getProgress()<=0.999){
                             progress.setProgress(up.getProgress());
-                            //System.out.println(up.getProgress());
                         }
                     }
                 }).start();
-                //new FileUpload(client).uploadFile(file.getAbsolutePath());
             }
         });
     }
@@ -211,7 +208,6 @@ public class Controller  extends Client implements Initializable{
                 }
             }
         }).start();
-       // up.downloadFile(file.getFilename(),size);
         FileData filed=(FileData)table.getSelectionModel().getSelectedItem();
         table.getItems().remove(filed);
         System.out.println(file.getFilename());
@@ -236,11 +232,9 @@ public class Controller  extends Client implements Initializable{
             public void run() {
                 while (up.getProgress()<=0.999){
                     progress.setProgress(up.getProgress());
-                    //System.out.println(up.getProgress());
                 }
             }
         }).start();
-        //new FileUpload(client).uploadFile(file.getAbsolutePath());
         String size=String.valueOf(file.length());
         FileData filedata;
         filedata=new FileData(file.getName().toString(),size+" bytes");

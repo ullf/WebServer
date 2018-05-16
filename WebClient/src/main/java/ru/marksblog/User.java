@@ -7,6 +7,7 @@ import java.util.HashMap;
 public class User implements Serializable {
 
     private String nickname;
+    private int id;
     // private ArrayList<String> userfiles=new ArrayList<>();
     private HashMap<String,Integer> userfiles=new HashMap<>();
 
@@ -16,6 +17,14 @@ public class User implements Serializable {
 
     public void setNickname(String nickname){
         this.nickname=nickname;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void addFile(String filename,int size){
